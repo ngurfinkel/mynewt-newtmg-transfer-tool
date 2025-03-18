@@ -24,6 +24,7 @@ MYNEWTDIR=$(GODIR)/src/mynewt.apache.org
 REPODIR=$(MYNEWTDIR)/$(TARGET)
 NEWTMGRDIR=$(REPODIR)/$(TARGET)
 DSTFILE=$(NEWTMGR_INSTALLDIR)/$(TARGET)/$(TARGET)
+
 build:
 	mkdir -p $(MYNEWTDIR)
 	ln -s $(NEWTMGR_INSTALLDIR) $(REPODIR)
@@ -33,7 +34,24 @@ build:
 	chmod -R 777 $(GODIR)
 	rm -rf $(GODIR)
 
+build-arm:
+	mkdir -p $(MYNEWTDIR)
+	ln -s $(NEWTMGR_INSTALLDIR) $(REPODIR)
+	GOPATH=$(GODIR) go get github.com/currantlabs/ble github.com/mgutz/logxi/v1 golang.org/x/sys/unix
+	cd $(NEWTMGRDIR) && GOPATH=$(GODIR) GOOS=linux GOARCH=arm GO15VENDOREXPERIMENT=1 GO111MODULE=on go install
+	mv $(GODIR)/bin/linux_arm/$(TARGET) $(DSTFILE)_arm
+	chmod -R 777 $(GODIR)
+	rm -rf $(GODIR)
+
+
 install:
 	install -d $(BIN)
 	install $(TARGET)/$(TARGET) $(BIN)
 	rm -f  $(TARGET)/$(TARGET)
+
+install-arm:
+	install -d $(BIN)
+	install $(TARGET)/$(TARGET)_arm $(BIN)
+	rm -f  $(TARGET)/$(TARGET)_arm
+
+.PHONY: build build-arm install install-arm
